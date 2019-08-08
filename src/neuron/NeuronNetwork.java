@@ -19,14 +19,15 @@ public class NeuronNetwork implements Serializable{
     private int iNodes; //количество входных узлов
     private int hNodes; //количество скрытых узлов
     private int oNodes; //количество выходных узлов
+    private int deepHiddenNodes;// количество глубоких узлов
     private double learningRate; //коэфициент обучения
 
     private InitWeight initWeight; //инициализация вессов в начале
     private FunctionActivation activation;// функция активации
     //метрица весовых коэффицентов
-    private double[][] wih; //связей wih(между входным и скрытым слоями)
-    private double[][] who; //и who (между скрытым и выходными слоями)
-    private Neuron[] neurons = new Neuron[2];
+//    private double[][] wih; //связей wih(между входным и скрытым слоями)
+//    private double[][] who; //и who (между скрытым и выходными слоями)
+    private Neuron[] neurons = new Neuron[3];
 
 
     public NeuronNetwork(int inputNodes, int hiddenNodes, int outputNodes, double learningRate,
@@ -34,16 +35,18 @@ public class NeuronNetwork implements Serializable{
         this.iNodes = inputNodes;
         this.hNodes = hiddenNodes;
         this.oNodes = outputNodes;
+        this.deepHiddenNodes = hiddenNodes + 50;
         this.learningRate = learningRate;
         this.initWeight = initWeight;
 
 //        wih = new double[hNodes][iNodes];
 //        who = new double[oNodes][hNodes];
-        neurons[0] = new Neuron(hNodes, iNodes, "wih"); //wih
-        neurons[1] = new Neuron(oNodes, hNodes, "who"); //who
-
+        neurons[0] = new Neuron(hNodes, iNodes, "wih"); //wih inputs to hidden
+        neurons[2] = new Neuron(deepHiddenNodes, hNodes); //hidden to deep hidden
+        neurons[1] = new Neuron(oNodes, deepHiddenNodes, "wdo"); //deep hidden to outputs
         initStartWeight(neurons[0]);
         initStartWeight(neurons[1]);
+        initStartWeight(neurons[2]);
         this.activation = activation;
     }
     private void initStartWeight(Neuron neuron){
@@ -63,28 +66,39 @@ public class NeuronNetwork implements Serializable{
 
         double[] hiddenOutputs = neurons[0].multMatrix(inputs);
 
+        double[]deepHiddenOuputs = neurons[2].multMatrix(hiddenOutputs);
 
+        double[] finalOutputs = neurons[1].multMatrix(deepHiddenOuputs);
 
-        double[] finalOutputs = neurons[1].multMatrix(hiddenOutputs);
-
-        //определение выходной ошибки
+        //ошибки выходного слоя
         double[] outputErrors = new double[oNodes];
         for (int i = 0; i < oNodes; i++) {
             outputErrors[i] = targets[i] - finalOutputs[i];
         }
 
+
         //hidden layer error is the outputErrors, spLit by weights, recombined at hidden nodes
-        double[]hiddenErrors = new double[hNodes];
-        for (int i = 0; i < hNodes; i++) {
+        double[]deepHiddenErrors = new double[deepHiddenNodes];
+        for (int i = 0; i < deepHiddenNodes; i++) {
             double errors = 0.0D;
             for (int j = 0; j < oNodes; j++) {
                 errors = errors + (neurons[1].getRangeWeight(j, i) * outputErrors[j]);
             }
+            deepHiddenErrors[i] = errors;
+        }
+
+
+        double[] hiddenErrors = new double[hNodes];
+        for (int i = 0; i < hNodes; i++) {
+            double errors = 0.0D;
+            for (int j = 0; j < deepHiddenNodes; j++) {
+                errors = errors + (neurons[2].getRangeWeight(j, i) * deepHiddenErrors[j]);
+            }
             hiddenErrors[i] = errors;
         }
         //update the weights
-        neurons[1].updateWeight(hiddenOutputs, finalOutputs, outputErrors);
-
+        neurons[1].updateWeight(deepHiddenOuputs, finalOutputs, outputErrors);
+        neurons[2].updateWeight(hiddenOutputs, deepHiddenOuputs, deepHiddenErrors);
         neurons[0].updateWeight(inputs, hiddenOutputs, hiddenErrors);
         //update the weights for the links between the input and hidden layers
 
@@ -104,12 +118,8 @@ public class NeuronNetwork implements Serializable{
         }
         return rate;
     }
-    //матричное умножение
-
-
-
+    //матричное умножени
     //опрос нейроной сети
-
     //query the nneural network
     public  double[] query(double[] inputsList){
         double[] inputs = inputsList;
@@ -117,11 +127,9 @@ public class NeuronNetwork implements Serializable{
 
         double[] hiddenOutputs = neurons[0].multMatrix(inputs);
 
+        double[]deepHiddenOuputs = neurons[2].multMatrix(hiddenOutputs);
 
-
-
-
-        double[]finalOutputs = neurons[1].multMatrix(hiddenOutputs);
+        double[] finalOutputs = neurons[1].multMatrix(deepHiddenOuputs);
 
 
         return finalOutputs;
@@ -161,10 +169,7 @@ public class NeuronNetwork implements Serializable{
 
     @Override
     public String toString() {
-        return "NeuronNetwork{" +
-                "matrixHiddenInput=" + wih +
-                ", matrixOutputHidden=" + who +
-                '}' ;
+        return "Neuron";
     }
 
 
@@ -273,13 +278,13 @@ public class NeuronNetwork implements Serializable{
         }
         public void updateWeight(double[] hiddenOutputs, double[] finalOutputs, double[] outputErrors) {
             //update the weights for the links between the hidden and output layer
-            double[]whoAdj = new double[rows];
+            double[]Adj = new double[rows];
             for (int i = 0; i < rows; i++) {
-                whoAdj[i] = outputErrors[i] * finalOutputs[i] * (1.0 - finalOutputs[i]);
+                Adj[i] = outputErrors[i] * finalOutputs[i] * (1.0 - finalOutputs[i]);
             }
             for (int i = 0; i < rows; i++) {
                 for (int j = 0; j < colls; j++) {
-                    this.weights[i][j] += learningRate * whoAdj[i] * hiddenOutputs[j];
+                    this.weights[i][j] += learningRate * Adj[i] * hiddenOutputs[j];
 
                 }
             }
