@@ -26,6 +26,7 @@ public class NeuronNetwork implements Serializable{
     //метрица весовых коэффицентов
     private double[][] wih; //связей wih(между входным и скрытым слоями)
     private double[][] who; //и who (между скрытым и выходными слоями)
+    private Neuron[] neurons = new Neuron[2];
 
 
     public NeuronNetwork(int inputNodes, int hiddenNodes, int outputNodes, double learningRate,
@@ -36,18 +37,19 @@ public class NeuronNetwork implements Serializable{
         this.learningRate = learningRate;
         this.initWeight = initWeight;
 
-//        wih = new SimpleMatrix(hNodes, iNodes);
-//        who = new SimpleMatrix(oNodes, hNodes);
-        wih = new double[hNodes][iNodes];
-        who = new double[oNodes][hNodes];
-        initStartWeight(wih);
-        initStartWeight(who);
+//        wih = new double[hNodes][iNodes];
+//        who = new double[oNodes][hNodes];
+        neurons[0] = new Neuron(hNodes, iNodes, "wih"); //wih
+        neurons[1] = new Neuron(oNodes, hNodes, "who"); //who
+        initStartWeight(neurons[0]);
+        initStartWeight(neurons[1]);
         this.activation = activation;
     }
-    private void initStartWeight(double[][] arr){
-        for (int i = 0; i < arr.length; i++) {
-            for (int j = 0; j < arr[0].length; j++) {
-                arr[i][j] = initWeight.getInitWeight(arr.length);
+    private void initStartWeight(Neuron neuron){
+        for (int i = 0; i < neuron.getRows(); i++) {
+            for (int j = 0; j < neuron.getColls(); j++) {
+                double initW = initWeight.getInitWeight(neuron.getRows());
+                neuron.setRangeWeight(i, j, initW);
             }
         }
     }
@@ -58,36 +60,11 @@ public class NeuronNetwork implements Serializable{
         double[] targets = targetsList;
 
 
+        double[] hiddenOutputs = neurons[0].multMatrix(inputs);
 
-        double[]hiddenInputs = new double[hNodes];
-        double[]hiddenOutputs = new double[hNodes];
-        //рассчитать входящие сигналы для скрытого слоя
-        for (int i = 0; i < hNodes; i++) {
-            //calculate signals into hidden layer
-            double hiBias = 0.0D;
-            for (int j = 0; j < iNodes; j++) {
-                hiBias += wih[i][j] * inputs[j];
-            }
-            hiddenInputs[i] = hiBias;
-            //calculate the signals emerging from hidden layer
-            hiddenOutputs[i] = activation.getOutput(hiddenInputs[i]);
-        }
+        double[] finalOutputs = neurons[1].multMatrix(hiddenOutputs);
 
-
-        double[] finalInputs = new double[oNodes];
-        double[] finalOutputs = new double[oNodes];
-
-        for (int i = 0; i < oNodes; i++) {
-            //calculate signals into final output layer
-            double fiBias = 0.0D;
-            for (int j = 0; j < hNodes; j++) {
-                fiBias += (who[i][j] * hiddenOutputs[j]);
-            }
-            finalInputs[i] = fiBias;
-            //calculate the signals emerging from final output layer
-            finalOutputs[i] = activation.getOutput(finalInputs[i]);
-        }
-        //output layer error is the (target - actual)
+        //определение выходной ошибки
         double[] outputErrors = new double[oNodes];
         for (int i = 0; i < oNodes; i++) {
             outputErrors[i] = targets[i] - finalOutputs[i];
@@ -98,33 +75,22 @@ public class NeuronNetwork implements Serializable{
         for (int i = 0; i < hNodes; i++) {
             double errors = 0.0D;
             for (int j = 0; j < oNodes; j++) {
-                errors = errors + (who[j][i] * outputErrors[j]);
+                errors = errors + (neurons[1].getRangeWeight(j, i) * outputErrors[j]);
             }
             hiddenErrors[i] = errors;
         }
+        //update the weights
+        neurons[1].updateWeight(hiddenOutputs, finalOutputs, outputErrors);
 
-        //update the weights for the links between the hidden and output layer
-        double[]whoAdj = new double[oNodes];
-        for (int i = 0; i < oNodes; i++) {
-            whoAdj[i] = outputErrors[i] * finalOutputs[i] * (1.0 - finalOutputs[i]);
-        }
-        for (int i = 0; i < oNodes; i++) {
-            for (int j = 0; j < hNodes; j++) {
-                who[i][j] += learningRate * whoAdj[i] * hiddenOutputs[j];
-            }
-        }
-
+        neurons[0].updateWeight(inputs, hiddenOutputs, hiddenErrors);
         //update the weights for the links between the input and hidden layers
-        double[]wihAdj = new double[hNodes];
-        for (int i = 0; i < hNodes; i++) {
-            wihAdj[i] = hiddenErrors[i] * hiddenOutputs[i] * (1.0 - hiddenOutputs[i]);
-        }
-        for (int i = 0; i < hNodes; i++) {
-            for (int j = 0; j < iNodes; j++) {
-                wih[i][j] += learningRate * wihAdj[i] * inputs[j];
-            }
-        }
-    }; //тренировка нейронной сети
+
+    }
+
+
+
+
+    ; //тренировка нейронной сети
 
     private SimpleMatrix multiplyNumberMatrix(double multiply, SimpleMatrix matrix){
         SimpleMatrix rate = new SimpleMatrix();
@@ -145,32 +111,15 @@ public class NeuronNetwork implements Serializable{
     public  double[] query(double[] inputsList){
         double[] inputs = inputsList;
 
-        double[] hiddenInputs = new double[hNodes];
-        double[] hiddenOutputs = new double[hNodes];
 
-        for (int i = 0; i < hNodes; i++) {
-            //calculate signals into hidden layer
-            double hiBias = 0.0D;
-            for (int j = 0; j < iNodes; j++) {
-                hiBias += wih[i][j] * inputs[j];
-            }
-            hiddenInputs[i] = hiBias;
-            //calculate the signals emergng from hidden layer
-            hiddenOutputs[i] = activation.getOutput(hiddenInputs[i]);
-        }
+        double[] hiddenOutputs = neurons[0].multMatrix(inputs);
 
-        double[]finalInputs = new double[oNodes];
-        double[]finalOutputs = new double[oNodes];
-        for (int i = 0; i < oNodes; i++) {
-            //calculate signals into final output layer
-            double fiBias = 0.0D;
-            for (int j = 0; j < hNodes; j++) {
-                fiBias += who[i][j] * hiddenOutputs[j];
-            }
-            finalInputs[i] = fiBias;
-            //calculate the signals emergikng from final output layer
-            finalOutputs[i] = activation.getOutput(finalInputs[i]);
-        }
+
+
+
+
+        double[]finalOutputs = neurons[1].multMatrix(hiddenOutputs);
+
 
         return finalOutputs;
     }; //опрос нейронной сети
@@ -235,5 +184,104 @@ public class NeuronNetwork implements Serializable{
 
 
         return arr;
+    }
+
+    private class Neuron{
+        private double[]inputs;
+        private double[]outputs;
+        private double[][]weights;
+        private int rows;
+        private int colls;
+        private String name;
+
+        public Neuron(int rows, int colls) {
+            this.rows = rows;
+            this.colls = colls;
+            this.weights = new double[rows][colls];
+            this.inputs = new double[rows];
+            this.outputs = new double[rows];
+            this.name = "Neuron";
+
+        }
+        public Neuron(int rows, int colls, String name){
+            this(rows, colls);
+            this.name = name;
+        }
+
+        public double[] getInputs() {
+            return inputs;
+        }
+
+        public double[] getOutputs() {
+            return outputs;
+        }
+
+        public double[][] getWeights() {
+            return weights;
+        }
+
+        public int getRows() {
+            return rows;
+        }
+
+        public int getColls() {
+            return colls;
+        }
+
+        public double getRangeInput(int index){
+            return inputs[index];
+        }
+
+        public double getRangeOutput(int index){
+            return outputs[index];
+        }
+
+        public double getRangeWeight(int rows, int colls){
+            return weights[rows][colls];
+        }
+
+        public void setRangeInput(int index, double data){
+            this.inputs[index] = data;
+        }
+
+        public void setRangeOutput(int index, double data){
+            this.outputs[index] = data;
+        }
+
+        public void setRangeWeight(int rows, int colls, double data){
+            this.weights[rows][colls] = data;
+        }
+        public double[] multMatrix(double[] inputs ) {
+//            System.out.format("rows %d: colls %d: name %s\n", rows, colls, name);
+            double[] hiddenInputs = new double[rows];
+            double[] hiddenOutputs = new double[rows];
+            //рассчитать входящие сигналы для скрытого слоя
+            for (int i = 0; i < this.rows; i++) {
+                //calculate signals into hidden layer
+                double hiBias = 0.0D;
+                for (int j = 0; j < this.colls; j++) {
+                    hiBias += this.weights[i][j] * inputs[j];
+                }
+                hiddenInputs[i] = hiBias;
+                //calculate the signals emerging from hidden layer
+                hiddenOutputs[i] = activation.getOutput(hiddenInputs[i]);
+            }
+            return hiddenOutputs;
+        }
+        public void updateWeight(double[] hiddenOutputs, double[] finalOutputs, double[] outputErrors) {
+            //update the weights for the links between the hidden and output layer
+            double[]whoAdj = new double[rows];
+            for (int i = 0; i < rows; i++) {
+                whoAdj[i] = outputErrors[i] * finalOutputs[i] * (1.0 - finalOutputs[i]);
+            }
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < colls; j++) {
+                    this.weights[i][j] += learningRate * whoAdj[i] * hiddenOutputs[j];
+
+                }
+            }
+        }
+
+
     }
 }

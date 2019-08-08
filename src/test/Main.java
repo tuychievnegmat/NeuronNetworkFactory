@@ -26,14 +26,14 @@ public class Main {
     public static void main(String[] args) {
         //количество входных, скрытых и выходных узлов
         int inputNodes = 784;
-        int hiddenNodes = 100;
+        int hiddenNodes = 200;
         int outputNodes = 10;
 
         //кооэфицент обучения равен 0.3
-        double learningRate = 0.3;
+        double learningRate = 0.25;
 
         //создать экземпляр нейронной сети
-        NeuronNetwork neuronNetwork = FactoryNeuron.FactoryNeuron(inputNodes, hiddenNodes, outputNodes, learningRate, TypeNeuron.ROOT_SIGMOID_INIT);
+        NeuronNetwork neuronNetwork = FactoryNeuron.FactoryNeuron(inputNodes, hiddenNodes, outputNodes, learningRate, TypeNeuron.NORMAL_SIGMOID_INIT);
 
         //загрузить в список тестовый наборданных CSV - файла набора MNIST
         File fileTraning = new File("D:\\javarush\\train data for neuron network\\mnist_train_100.csv");
@@ -71,6 +71,7 @@ public class Main {
                         targets[j] = 0.01;
                     }
 
+
                     targets[mnistLabel] = 0.99;
                     neuronNetwork.train(inputs,targets);
                 }
@@ -80,8 +81,7 @@ public class Main {
             //test the neural network
         //scorecard for how well the network performs, initially empty
         double[]scoreCard = new double[arrayTestList.length];
-        System.out.println("scoreCard lenght: " + scoreCard.length);
-        System.out.println("arrayTestList size:" + arrayTestList.length);
+
         //go through all the records in the test data set
 
         double correctLabel = 0.0;
