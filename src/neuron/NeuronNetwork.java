@@ -41,6 +41,7 @@ public class NeuronNetwork implements Serializable{
 //        who = new double[oNodes][hNodes];
         neurons[0] = new Neuron(hNodes, iNodes, "wih"); //wih
         neurons[1] = new Neuron(oNodes, hNodes, "who"); //who
+
         initStartWeight(neurons[0]);
         initStartWeight(neurons[1]);
         this.activation = activation;
@@ -61,6 +62,8 @@ public class NeuronNetwork implements Serializable{
 
 
         double[] hiddenOutputs = neurons[0].multMatrix(inputs);
+
+
 
         double[] finalOutputs = neurons[1].multMatrix(hiddenOutputs);
 
