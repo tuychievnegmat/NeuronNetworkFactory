@@ -12,11 +12,7 @@ import view.View;
 
 import javax.swing.*;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.StringTokenizer;
-
+import java.util.*;
 
 
 /**
@@ -26,11 +22,12 @@ public class Main {
     public static void main(String[] args) {
         //количество входных, скрытых и выходных узлов
         int inputNodes = 784;
-        int hiddenNodes = 200;
+        int hiddenNodes = 250;
         int outputNodes = 10;
+        boolean dounwload = false;
 
         //кооэфицент обучения равен 0.3
-        double learningRate = 0.25;
+        double learningRate = 0.2;
 
         //создать экземпляр нейронной сети
         NeuronNetwork neuronNetwork = FactoryNeuron.FactoryNeuron(inputNodes, hiddenNodes, outputNodes, learningRate, TypeNeuron.NORMAL_SIGMOID_INIT);
@@ -49,36 +46,65 @@ public class Main {
 
             //train the neural network
             //epochs is the number of times the trining data set is used for trainin
+        Date startTime, finishTime;
+        startTime = new Date();
             int epochs = 5;
             int mnistLabel = 0;
             double[]inputs = new double[inputNodes];
             double[]targets = new double[outputNodes];
-            for (int p = 0; p < epochs; p++) {
-                for (int i = 0; i < arrayTrainList.length; i++) {
-                    //go through all records in the training data set
-                    for (int j = 0; j < inputNodes + 1; j++) {
-                        if(j == 0){
-                            mnistLabel = (int) arrayTrainList[i][j];
-                        }else {
-                            double input = arrayTrainList[i][j];
-                            //scale and shift the inputs
-                            input = (input / 255.0 * 0.99) + 0.01;
-                            inputs [j - 1] = input;
-                        }
-                    }
-                    //create the target output values(all 0.01, except the desired label which is 0.99)
-                    for (int j = 0; j < outputNodes; j++) {
-                        targets[j] = 0.01;
-                    }
+            if(dounwload){
+                try {
+                    ObjectInputStream read = new ObjectInputStream(new FileInputStream("save neuron network.txt"));
+                    neuronNetwork = (NeuronNetwork) read.readObject();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ClassNotFoundException e){
 
-
-                    targets[mnistLabel] = 0.99;
-                    neuronNetwork.train(inputs,targets);
                 }
 
             }
+            else {
+                //начало времени измерения алгоритма
 
-            //test the neural network
+                for (int p = 0; p < epochs; p++) {
+                    for (int i = 0; i < arrayTrainList.length; i++) {
+                        //go through all records in the training data set
+                        for (int j = 0; j < inputNodes + 1; j++) {
+                            if (j == 0) {
+                                mnistLabel = (int) arrayTrainList[i][j];
+                            } else {
+                                double input = arrayTrainList[i][j];
+                                //scale and shift the inputs
+                                input = (input / 255.0 * 0.99) + 0.01;
+                                inputs[j - 1] = input;
+                            }
+                        }
+                        //create the target output values(all 0.01, except the desired label which is 0.99)
+                        for (int j = 0; j < outputNodes; j++) {
+                            targets[j] = 0.01;
+                        }
+
+
+                        targets[mnistLabel] = 0.99;
+                        neuronNetwork.train(inputs, targets);
+                    }
+
+                }
+                try {
+                    ObjectOutputStream write = new ObjectOutputStream(new FileOutputStream("save neuron network.txt"));
+                    write.writeObject(neuronNetwork);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        finishTime = new Date();
+
+        System.out.format("затраченно времени\n start %s\n finish %s\n", startTime.toString(), finishTime.toString());
+        int min = finishTime.getMinutes() - startTime.getMinutes();
+        int sec = finishTime.getSeconds() - startTime.getSeconds();
+        System.out.format("min:%d sec:%d", min, sec);
+
+        //test the neural network
         //scorecard for how well the network performs, initially empty
         double[]scoreCard = new double[arrayTestList.length];
 
@@ -90,7 +116,7 @@ public class Main {
                 if(j == 0){
                     //correct answer is first value
                     correctLabel = arrayTestList[read][j];
-                    System.out.println("correctLabel: " + correctLabel);
+
                 }else {
                     double input = arrayTestList[read][j];
                     //scale and shift the inputs
@@ -100,11 +126,11 @@ public class Main {
             }
             //query the network
             double[]outputs = neuronNetwork.query(inputs);
-            System.out.println("start outputs: " + correctLabel);
-            for (int i = 0; i < outputs.length; i++) {
-                System.out.format("[%d][%f]: ", i, outputs[i]);
-            }
-            System.out.println("finish outputs: ");
+
+//            for (int i = 0; i < outputs.length; i++) {
+//                System.out.format("[%d][%f]: ", i, outputs[i]);
+//            }
+//            System.out.println("finish outputs: ");
 
             //the index of the highest value corresponds to the label
             double label = 0;
@@ -115,6 +141,7 @@ public class Main {
                     label = k;
             }
             }
+//            System.out.format("correctLabel %f, label %f ###", correctLabel, label);
             //append correct or incorrect to list
             if(label == correctLabel){
                 //network's answer matches ccrrect answer, add 1 to scorecard

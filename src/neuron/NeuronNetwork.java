@@ -35,7 +35,7 @@ public class NeuronNetwork implements Serializable{
         this.iNodes = inputNodes;
         this.hNodes = hiddenNodes;
         this.oNodes = outputNodes;
-        this.deepHiddenNodes = hiddenNodes + 50;
+        this.deepHiddenNodes = hiddenNodes - 50;
         this.learningRate = learningRate;
         this.initWeight = initWeight;
 
@@ -59,6 +59,7 @@ public class NeuronNetwork implements Serializable{
     }
 
     public void train(double[]inputsList, double[] targetsList){
+
 
         double[] inputs = inputsList;
         double[] targets = targetsList;
@@ -194,7 +195,7 @@ public class NeuronNetwork implements Serializable{
         return arr;
     }
 
-    private class Neuron{
+    private class Neuron implements Serializable{
         private double[]inputs;
         private double[]outputs;
         private double[][]weights;
@@ -211,7 +212,7 @@ public class NeuronNetwork implements Serializable{
             this.name = "Neuron";
 
         }
-        public Neuron(int rows, int colls, String name){
+        public Neuron (int rows, int colls, String name){
             this(rows, colls);
             this.name = name;
         }

@@ -6,6 +6,6 @@ package functionActivation;
 public class SteppedFun implements FunctionActivation {
     @Override
     public double getOutput(double input) {
-        return input > 5? 1: 0;
+        return input > 0.5? 1: 0;
     }
 }
