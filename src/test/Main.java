@@ -3,9 +3,13 @@ package test;
 
 import factory.FactoryNeuron;
 import factory.TypeNeuron;
+import functionActivation.FunctionActivation;
+import functionActivation.GiperbolicTangesFun;
 import functionActivation.SigmoidFun;
 import initializationOfWeight.NormalWeight;
 import neuron.NeuronNetwork;
+import neuron.Neurons;
+import neuron.StaticNeuronFunc;
 import org.ejml.simple.SimpleMatrix;
 import view.Model;
 import view.View;
@@ -20,6 +24,8 @@ import java.util.*;
  */
 public class Main {
     public static void main(String[] args) {
+        //test fun activation
+
         //количество входных, скрытых и выходных узлов
         int inputNodes = 784;
         int hiddenNodes = 250;
@@ -30,7 +36,8 @@ public class Main {
         double learningRate = 0.2;
 
         //создать экземпляр нейронной сети
-        NeuronNetwork neuronNetwork = FactoryNeuron.FactoryNeuron(inputNodes, hiddenNodes, outputNodes, learningRate, TypeNeuron.NORMAL_SIGMOID_INIT);
+        Neurons neuronNetwork = FactoryNeuron.FactoryNeuron(inputNodes, hiddenNodes, outputNodes, learningRate, TypeNeuron.NORMAL_SIGMOID_INIT);
+        System.out.println(neuronNetwork.toString());
 
         //загрузить в список тестовый наборданных CSV - файла набора MNIST
         File fileTraning = new File("D:\\javarush\\train data for neuron network\\mnist_train_100.csv");
@@ -182,7 +189,7 @@ public class Main {
     }
 
         //тест проверки входных данных после подготовки
-    public static void forTrainAndShow(double[][]arrayList, NeuronNetwork neuronNetwork, int numRows, double[]scoreCard){
+    public static void forTrainAndShow(double[][]arrayList, Neurons neuronNetwork, int numRows, double[]scoreCard){
         List<Double> testlist;
         Model model;
         JFrame game = new JFrame();
@@ -194,7 +201,7 @@ public class Main {
 
 
             double[]listToDimensional = Arrays.copyOfRange(lists, 1, lists.length);
-            matrix = neuronNetwork.listToTwoDimensionalArray(listToDimensional, numRows);
+            matrix = StaticNeuronFunc.listToTwoDimensionalArray(listToDimensional, numRows);
 
 
             model = new Model(matrix);

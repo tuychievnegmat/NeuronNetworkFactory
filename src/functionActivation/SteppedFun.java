@@ -8,4 +8,9 @@ public class SteppedFun implements FunctionActivation {
     public double getOutput(double input) {
         return input > 0.5? 1: 0;
     }
+
+    @Override
+    public String toString() {
+        return "SteppedFun{}";
+    }
 }

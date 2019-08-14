@@ -9,4 +9,9 @@ public class RootWeight implements InitWeight{
     public double getInitWeight(int first) {
        return Math.random() * (1/ Math.sqrt(first));
     }
+
+    @Override
+    public String toString() {
+        return "RootWeight{}";
+    }
 }

@@ -10,4 +10,9 @@ public class HalfWeight implements InitWeight {
     public double getInitWeight(int first) {
         return Math.random() - 0.5;
     }
+
+    @Override
+    public String toString() {
+        return "HalfWeight{}";
+    }
 }

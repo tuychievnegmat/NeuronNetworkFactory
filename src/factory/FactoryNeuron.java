@@ -2,6 +2,7 @@ package factory;
 
 import functionActivation.GiperbolicTangesFun;
 import functionActivation.SigmoidFun;
+import functionActivation.SigmoidNotNullFun;
 import functionActivation.SteppedFun;
 import initializationOfWeight.ClassicInitWeight;
 import initializationOfWeight.HalfWeight;
@@ -21,6 +22,9 @@ public class FactoryNeuron implements                                         Se
             case CLASSIC_STEPPED_INIT: return new NeuronNetwork(input, hidden, output, learningRate, new ClassicInitWeight(), new SteppedFun());
             case NORMAL_STEPPED_INIT: return new NeuronNetwork(input, hidden, output, learningRate, new NormalWeight(), new SteppedFun());
             case NORMAL_GIPERBOLIC_INIT: return new NeuronNetwork(input, hidden, output, learningRate, new NormalWeight(), new GiperbolicTangesFun());
+
+            //test
+            case NORMAL_TEST_NOT_NULL_INIT: return new NeuronNetwork(input, hidden, output, learningRate, new NormalWeight(), new SigmoidNotNullFun());
             default: return null;
 
         }

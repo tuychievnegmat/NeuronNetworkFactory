@@ -18,4 +18,9 @@ public class NormalWeight implements InitWeight{
     public double getInitWeight(int first) {
         return 0.0 + random.nextGaussian() * (Math.pow(first, - 0.5));
     }
+
+    @Override
+    public String toString() {
+        return "NormalWeight{}";
+    }
 }

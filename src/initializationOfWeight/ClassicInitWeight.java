@@ -8,4 +8,9 @@ public class ClassicInitWeight implements InitWeight {
     public double getInitWeight(int first) {
         return Math.random();
     }
+
+    @Override
+    public String toString() {
+        return "ClassicInitWeight{}";
+    }
 }

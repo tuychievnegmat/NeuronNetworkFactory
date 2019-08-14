@@ -10,4 +10,9 @@ public class SigmoidFun implements FunctionActivation {
     public double getOutput(double input) {
         return 1/(1+(1/(Math.pow(2.71828, input))));
     }
+
+    @Override
+    public String toString() {
+        return "SigmoidFun{}";
+    }
 }
