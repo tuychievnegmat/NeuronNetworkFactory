@@ -39,24 +39,19 @@ public class NeuronNetwork implements Neurons{
         this.learningRate = learningRate;
         this.initWeight = initWeight;
 
-//        wih = new double[hNodes][iNodes];
-//        who = new double[oNodes][hNodes];
+
         neurons[0] = new Neuron(hNodes, iNodes, "wih", learningRate, activation); //wih inputs to hidden
         neurons[2] = new Neuron(deepHiddenNodes, hNodes, "whd", learningRate, activation); //hidden to deep hidden
         neurons[1] = new Neuron(oNodes, deepHiddenNodes, "wdo", learningRate, activation); //deep hidden to outputs
-        initStartWeight(neurons[0]);
-        initStartWeight(neurons[1]);
-        initStartWeight(neurons[2]);
+
+
+        //инициализация нейронных узлов
+        for (int i = 0; i < neurons.length; i++) {
+            StaticNeuronFunc.initStartWeight(neurons[i], initWeight);
+        }
         this.activation = activation;
     }
-    private void initStartWeight(Neuron neuron){
-        for (int i = 0; i < neuron.getRows(); i++) {
-            for (int j = 0; j < neuron.getColls(); j++) {
-                double initW = initWeight.getInitWeight(neuron.getRows());
-                neuron.setRangeWeight(i, j, initW);
-            }
-        }
-    }
+
 
     public void train(double[]inputsList, double[] targetsList){
 

@@ -1,5 +1,6 @@
 package neuron;
 
+import initializationOfWeight.InitWeight;
 import org.ejml.simple.SimpleMatrix;
 
 public class StaticNeuronFunc {
@@ -18,5 +19,13 @@ public class StaticNeuronFunc {
             }
         }
         return matrix;
+    }
+    public static void initStartWeight(Neuron neuron, InitWeight initWeight){
+        for (int i = 0; i < neuron.getRows(); i++) {
+            for (int j = 0; j < neuron.getColls(); j++) {
+                double initW = initWeight.getInitWeight(neuron.getRows());
+                neuron.setRangeWeight(i, j, initW);
+            }
+        }
     }
 }
