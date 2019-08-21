@@ -10,4 +10,9 @@ public class GiperbolicTangesFun implements FunctionActivation{
     public String toString() {
         return "GiperbolicTangesFun{}";
     }
+
+    @Override
+    public ActivationType getActivation() {
+        return ActivationType.GIPERBOLIC_TANGES_FUN;
+    }
 }

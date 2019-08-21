@@ -1,5 +1,6 @@
 package neuron;
 
+import functionActivation.ActivationType;
 import functionActivation.FunctionActivation;
 import initializationOfWeight.InitWeight;
 
@@ -69,5 +70,10 @@ public class TwoHemispheresNeuronNetwork implements Neurons
     @Override
     public double[] query(double[] inputsList) {
         return new double[0];
+    }
+
+    @Override
+    public ActivationType getActivation() {
+        return activation.getActivation();
     }
 }

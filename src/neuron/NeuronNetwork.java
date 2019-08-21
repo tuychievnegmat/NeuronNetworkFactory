@@ -2,6 +2,7 @@ package neuron;
 
 import NeuronException.WrongDeepException;
 import com.sun.org.apache.xml.internal.utils.WrongParserException;
+import functionActivation.ActivationType;
 import functionActivation.FunctionActivation;
 import functionActivation.SigmoidFun;
 import initializationOfWeight.InitWeight;
@@ -213,5 +214,8 @@ public class NeuronNetwork implements Neurons{
         return arr;
     }
 
-
+    @Override
+    public ActivationType getActivation() {
+        return activation.getActivation();
+    }
 }

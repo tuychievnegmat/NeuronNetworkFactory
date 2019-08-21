@@ -3,6 +3,7 @@ package test;
 
 import factory.FactoryNeuron;
 import factory.TypeNeuron;
+import functionActivation.ActivationType;
 import functionActivation.FunctionActivation;
 import functionActivation.GiperbolicTangesFun;
 import functionActivation.SigmoidFun;
@@ -35,8 +36,13 @@ public class Main {
         //кооэфицент обучения равен 0.3
         double learningRate = 0.2;
 
+        TypeNeuron typeNeuron = TypeNeuron.NORMAL_SIGMOID_INIT;
+
+
         //создать экземпляр нейронной сети
-        Neurons neuronNetwork = FactoryNeuron.FactoryNeuron(inputNodes, hiddenNodes, outputNodes, learningRate, TypeNeuron.NORMAL_SIGMOID_INIT);
+        Neurons neuronNetwork = FactoryNeuron.FactoryNeuron(inputNodes, hiddenNodes, outputNodes, learningRate, typeNeuron);
+        //функция активации
+        ActivationType functionActivation = neuronNetwork.getActivation();
         System.out.println(neuronNetwork.toString());
 
         //загрузить в список тестовый наборданных CSV - файла набора MNIST
@@ -82,17 +88,17 @@ public class Main {
                             } else {
                                 double input = arrayTrainList[i][j];
                                 //scale and shift the inputs
-                                input = (input / 255.0 * 0.99) + 0.01;
+                                input = (input / 255.0 * functionActivation.getCONST_TARGET()) + 0.01;
                                 inputs[j - 1] = input;
                             }
                         }
                         //create the target output values(all 0.01, except the desired label which is 0.99)
                         for (int j = 0; j < outputNodes; j++) {
-                            targets[j] = 0.01;
+                            targets[j] = functionActivation.getCONST_WRONG();
                         }
 
 
-                        targets[mnistLabel] = 0.99;
+                        targets[mnistLabel] = functionActivation.getCONST_TARGET();
                         neuronNetwork.train(inputs, targets);
                     }
 
@@ -127,7 +133,7 @@ public class Main {
                 }else {
                     double input = arrayTestList[read][j];
                     //scale and shift the inputs
-                    input = (input / 255.0 * 0.99) + 0.01;
+                    input = (input / 255.0 * functionActivation.getCONST_TARGET()) + 0.01;
                     inputs[j -1 ] = input;
                 }
             }
@@ -232,7 +238,7 @@ public class Main {
 //        JFrame game = new JFrame();
 
 
-        game.setTitle("2048");
+        game.setTitle("Neuron Network");
         game.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         game.setSize(1024, 1024);
         game.setResizable(false);

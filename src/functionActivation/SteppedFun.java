@@ -13,4 +13,9 @@ public class SteppedFun implements FunctionActivation {
     public String toString() {
         return "SteppedFun{}";
     }
+
+    @Override
+    public ActivationType getActivation() {
+        return ActivationType.STEPPED_FUN;
+    }
 }

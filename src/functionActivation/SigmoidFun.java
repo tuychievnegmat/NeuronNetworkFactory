@@ -15,4 +15,9 @@ public class SigmoidFun implements FunctionActivation {
     public String toString() {
         return "SigmoidFun{}";
     }
+
+    @Override
+    public ActivationType getActivation() {
+        return ActivationType.SIGMOID_FUN;
+    }
 }

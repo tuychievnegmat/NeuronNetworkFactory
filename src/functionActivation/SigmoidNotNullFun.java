@@ -11,4 +11,9 @@ public class SigmoidNotNullFun implements FunctionActivation {
     public String toString() {
         return "SigmoidNotNullFun{}";
     }
+
+    @Override
+    public ActivationType getActivation() {
+        return ActivationType.SIGMOID_NOT_NULL;
+    }
 }
