@@ -25,7 +25,8 @@ public class NeuronNetwork implements Neurons{
     private int deepHiddenNodes;// количество глубоких узлов
     private int deep; //глубина - количество слоев скрытых минимум один
     private double learningRate; //коэфициент обучения
-    private double[]outputs; //выходы для подстчета
+    private double[][]outputs; //выходы для подстчета
+    private double[][]outputsErrors;//выходные ошибки
 
 
     private InitWeight initWeight; //инициализация вессов в начале
@@ -52,19 +53,20 @@ public class NeuronNetwork implements Neurons{
             e.printStackTrace();
         }
         neurons = new Neuron[2 + deep];
+        outputs = new double[neurons.length][];
+        outputsErrors = new double[neurons.length][];
 
 
         if(neurons.length == 3){
             neurons[0] = new Neuron(hNodes, iNodes, "wih", learningRate, activation); //wih inputs to hidden
-            neurons[1] = new Neuron(deepHiddenNodes, hNodes, "whd", learningRate, activation); //hidden to deep hidden
-            neurons[2] = new Neuron(oNodes, deepHiddenNodes, "wdo", learningRate, activation); //deep hidden to outputs
+            neurons[1] = new Neuron(hNodes, hNodes, "whd", learningRate, activation); //hidden to deep hidden
+            neurons[2] = new Neuron(oNodes, hNodes, "wdo", learningRate, activation); //deep hidden to outputs
         }else {
             neurons[0] = new Neuron(hNodes, iNodes, "wih", learningRate, activation); //wih inputs to hidden
-            neurons[1] = new Neuron(deepHiddenNodes, hNodes, "whd", learningRate, activation); //hidden to deep hidden
-            for (int i = 2; i < neurons.length -1; i++) {
-                neurons[i] = new Neuron(deepHiddenNodes, deepHiddenNodes, String.format("wdd[%d]", i), learningRate, activation);
+            for (int i = 1; i < neurons.length -1; i++) {
+                neurons[i] = new Neuron(hNodes, hNodes, String.format("wdd[%d]", i), learningRate, activation);
             }
-            neurons[neurons.length] = new Neuron(oNodes, deepHiddenNodes, String.format("wdo[%d]", neurons.length, learningRate, activation));
+            neurons[neurons.length] = new Neuron(oNodes, hNodes, String.format("wdo[%d]", neurons.length, learningRate, activation));
         }
 
 
@@ -85,38 +87,47 @@ public class NeuronNetwork implements Neurons{
 
 
         double[] hiddenOutputs = neurons[0].multMatrix(inputs);
-
         double[]deepHiddenOuputs = neurons[1].multMatrix(hiddenOutputs);
-
         double[] finalOutputs = neurons[2].multMatrix(deepHiddenOuputs);
 
+
+        //вычисление для несколько слев
+        outputs[0] = neurons[0].multMatrix(inputs);
+        for (int i = 1; i < neurons.length; i++) {
+            outputs[i] = neurons[i].multMatrix(outputs[i-1]);
+        }
+
+        //outputsErrors
+        outputsErrors[outputs.length-1] = new double[oNodes];//выходной узел ошибки test
         //ошибки выходного слоя
         double[] outputErrors = new double[oNodes];
         for (int i = 0; i < oNodes; i++) {
             outputErrors[i] = targets[i] - finalOutputs[i];
+            //test версия
+            outputsErrors[outputs.length-1][i] = targets[i] - outputs[neurons.length-1][i];
         }
 
 
+
         //hidden layer error is the outputErrors, spLit by weights, recombined at hidden nodes
-        double[]deepHiddenErrors = new double[deepHiddenNodes];
-        for (int i = 0; i < deepHiddenNodes; i++) {
+        double[] deepHiddenErrors = getErrorCounting(outputErrors, oNodes, 2);
+        double[] hiddenErrors = getErrorCounting(deepHiddenErrors, hNodes, 1);
+        /* //hidden layer error is the outputErrors, spLit by weights, recombined at hidden nodes
+        double[]deepHiddenErrors = new double[hNodes];
+        for (int i = 0; i < hNodes; i++) {
             double errors = 0.0D;
             for (int j = 0; j < oNodes; j++) {
                 errors = errors + (neurons[2].getRangeWeight(j, i) * outputErrors[j]);
             }
             deepHiddenErrors[i] = errors;
-        }
+        }*/
 
 
-        double[] hiddenErrors = new double[hNodes];
-        for (int i = 0; i < hNodes; i++) {
-            double errors = 0.0D;
-            for (int j = 0; j < deepHiddenNodes; j++) {
-                errors = errors + (neurons[1].getRangeWeight(j, i) * deepHiddenErrors[j]);
-            }
-            hiddenErrors[i] = errors;
-        }
+
         //update the weights
+//        for (int i = neurons.length-1; i >= 0 ; i++) {
+//            neurons[i].updateWeight(outputs[i-1],outputs[i], outputsErrors[i]);
+//        }
         neurons[2].updateWeight(deepHiddenOuputs, finalOutputs, outputErrors);
         neurons[1].updateWeight(hiddenOutputs, deepHiddenOuputs, deepHiddenErrors);
         neurons[0].updateWeight(inputs, hiddenOutputs, hiddenErrors);
@@ -124,7 +135,18 @@ public class NeuronNetwork implements Neurons{
 
     }
 
-
+    public double[] getErrorCounting(double[] outputErrors, int oNodes, int i2) {
+        System.out.println("neurnons " + neurons[i2]);
+        double[] deepHiddenErrors = new double[hNodes];
+        for (int i = 0; i < hNodes; i++) {
+            double errors = 0.0D;
+            for (int j = 0; j < oNodes; j++) {
+                errors = errors + (neurons[i2].getRangeWeight(j, i) * outputErrors[j]);
+            }
+            deepHiddenErrors[i] = errors;
+        }
+        return deepHiddenErrors;
+    }
 
 
     ; //тренировка нейронной сети
