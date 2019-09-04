@@ -3,6 +3,7 @@ package neuron;
 import functionActivation.FunctionActivation;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 class Neuron implements Serializable {
     private double[]inputs;
@@ -14,6 +15,10 @@ class Neuron implements Serializable {
     private double learningRate = 0.3;
     private FunctionActivation activation;
 
+    @Override
+    public String toString() {
+        return name;
+    }
 
     public double getLearningRate() {
         return learningRate;

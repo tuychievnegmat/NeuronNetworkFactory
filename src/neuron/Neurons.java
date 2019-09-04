@@ -10,4 +10,5 @@ public interface Neurons extends Serializable {
     public  double[] query(double[] inputsList);
     public ActivationType getActivation();
 
+
 }
