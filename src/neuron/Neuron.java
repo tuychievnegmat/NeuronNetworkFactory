@@ -104,6 +104,7 @@ class Neuron implements Serializable {
             }
             hiddenInputs[i] = hiBias;
             //calculate the signals emerging from hidden layer
+            System.out.format("hiddenOutputs[%d]\n", i);
             hiddenOutputs[i] = activation.getOutput(hiddenInputs[i]);
         }
         return hiddenOutputs;

@@ -16,6 +16,9 @@ public enum TypeNeuron {
     NORMAL_GIPERBOLIC_INIT,
     NORMAL_TEST_NOT_NULL_INIT;
 
+    //deep
+
+
 
 
 

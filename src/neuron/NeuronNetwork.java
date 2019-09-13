@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Created by k-terra on 11.07.2019.
@@ -103,9 +104,13 @@ public class NeuronNetwork implements Neurons{
         }
 
         //hidden layer error is the outputErrors, spLit by weights, recombined at hidden nodes
-        outputsErrors[1] = getErrorCounting(outputsErrors[2], oNodes, 2);
+        //test
+        System.out.format("lenght %d", lenght);
+        outputsErrors[lenght-2] = getErrorCounting(outputsErrors[lenght-1], oNodes , hNodes, lenght-1);
+
+
         for (int i = lenght-2; i >=1 ; i--) {
-            outputsErrors[i-1] = getErrorCounting(outputsErrors[i],hNodes, i);
+            outputsErrors[i-1] = getErrorCounting(outputsErrors[i],hNodes, hNodes, i);
         }
 
         //update the weights
@@ -115,7 +120,7 @@ public class NeuronNetwork implements Neurons{
         neurons[0].updateWeight(inputs,outputs[1], outputsErrors[1]);
     }
 
-    public double[] getErrorCounting(double[] outputErrors, int oNodes, int i2) {
+    public double[] getErrorCounting(double[] outputErrors, int oNodes, int hNodes, int i2) {
         double[] deepHiddenErrors = new double[hNodes];
         for (int i = 0; i < hNodes; i++) {
             double errors = 0.0D;
