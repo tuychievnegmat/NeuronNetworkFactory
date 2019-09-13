@@ -27,6 +27,7 @@ public class NeuronNetwork implements Neurons{
     private double learningRate; //коэфициент обучения
     private double[][]outputs; //выходы для подстчета
     private double[][]outputsErrors;//выходные ошибки
+    private int lenght; //длина количество слоев
 
 
     private InitWeight initWeight; //инициализация вессов в начале
@@ -52,9 +53,10 @@ public class NeuronNetwork implements Neurons{
             System.out.format("wrong deep, deep = %d", deep);
             e.printStackTrace();
         }
-        neurons = new Neuron[2 + deep];
-        outputs = new double[neurons.length][];
-        outputsErrors = new double[neurons.length][];
+        this.lenght = 2 + deep;
+        neurons = new Neuron[lenght];
+        outputs = new double[lenght][];
+        outputsErrors = new double[lenght][];
 
 
         if(neurons.length == 3){
@@ -63,7 +65,7 @@ public class NeuronNetwork implements Neurons{
             neurons[2] = new Neuron(oNodes, hNodes, "wdo", learningRate, activation); //deep hidden to outputs
         }else {
             neurons[0] = new Neuron(hNodes, iNodes, "wih", learningRate, activation); //wih inputs to hidden
-            for (int i = 1; i < neurons.length -1; i++) {
+            for (int i = 1; i < lenght -1; i++) {
                 neurons[i] = new Neuron(hNodes, hNodes, String.format("wdd[%d]", i), learningRate, activation);
             }
             //тест проверка
@@ -73,7 +75,7 @@ public class NeuronNetwork implements Neurons{
 
 
         //инициализация нейронных узлов
-        for (int i = 0; i < neurons.length; i++) {
+        for (int i = 0; i < lenght; i++) {
             StaticNeuronFunc.initStartWeight(neurons[i], initWeight);
         }
         this.activation = activation;
@@ -88,21 +90,21 @@ public class NeuronNetwork implements Neurons{
 
 //        //вычисление для несколько слев
         outputs[0] = neurons[0].multMatrix(inputs);
-        for (int i = 1; i < neurons.length; i++) {
+        for (int i = 1; i < lenght; i++) {
             outputs[i] = neurons[i].multMatrix(outputs[i-1]);
         }
 
         //outputsErrors
-        outputsErrors[outputs.length-1] = new double[oNodes];//выходной узел ошибки test
+        outputsErrors[lenght-1] = new double[oNodes];//выходной узел ошибки test
         //ошибки выходного слоя
         double[] outputErrors = new double[oNodes];
         for (int i = 0; i < oNodes; i++) {
-            outputsErrors[outputs.length-1][i] = targets[i] - outputs[neurons.length-1][i];
+            outputsErrors[lenght-1][i] = targets[i] - outputs[lenght-1][i];
         }
 
         //hidden layer error is the outputErrors, spLit by weights, recombined at hidden nodes
         outputsErrors[1] = getErrorCounting(outputsErrors[2], oNodes, 2);
-        for (int i = outputsErrors.length-2; i >=1 ; i--) {
+        for (int i = lenght-2; i >=1 ; i--) {
             outputsErrors[i-1] = getErrorCounting(outputsErrors[i],hNodes, i);
         }
 
@@ -142,11 +144,11 @@ public class NeuronNetwork implements Neurons{
     public  double[] query(double[] inputsList){
 
         outputs[0]  = neurons[0].multMatrix(inputsList);
-        for (int i = 1; i < outputsErrors.length; i++) {
+        for (int i = 1; i < lenght; i++) {
             outputs[i] = neurons[i].multMatrix(outputs[i-1]);
         }
 
-        return outputs[outputs.length-1];
+        return outputs[lenght-1];
     }; //опрос нейронной сети
 
     //преобразовать лист в двумерный массив
