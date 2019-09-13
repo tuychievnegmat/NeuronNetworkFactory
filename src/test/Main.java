@@ -35,12 +35,13 @@ public class Main {
 
         //кооэфицент обучения равен 0.3
         double learningRate = 0.2;
+        int deep = 1;
 
         TypeNeuron typeNeuron = TypeNeuron.NORMAL_SIGMOID_INIT;
 
 
         //создать экземпляр нейронной сети
-        Neurons neuronNetwork = FactoryNeuron.FactoryNeuron(inputNodes, hiddenNodes, outputNodes, learningRate, typeNeuron);
+        Neurons neuronNetwork = FactoryNeuron.FactoryNeuron(inputNodes, hiddenNodes, outputNodes, learningRate, typeNeuron, deep);
         //функция активации
         ActivationType functionActivation = neuronNetwork.getActivation();
         System.out.println(neuronNetwork.toString());
