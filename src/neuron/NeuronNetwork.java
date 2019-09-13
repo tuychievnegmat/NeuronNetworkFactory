@@ -66,7 +66,8 @@ public class NeuronNetwork implements Neurons{
             for (int i = 1; i < neurons.length -1; i++) {
                 neurons[i] = new Neuron(hNodes, hNodes, String.format("wdd[%d]", i), learningRate, activation);
             }
-            neurons[neurons.length] = new Neuron(oNodes, hNodes, String.format("wdo[%d]", neurons.length, learningRate, activation));
+            //тест проверка
+            neurons[neurons.length-1] = new Neuron(oNodes, hNodes, String.format("wdo[%d]", neurons.length-1 ),learningRate, activation);
         }
 
 
